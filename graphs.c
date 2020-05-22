@@ -81,46 +81,29 @@ char* str_sex(person* node){
 		return "Homme";
 }
 
+//fonction pour éviter d'avoir des pavés dans celle qui suit
+char* field_or_null(person* field){
+	if (field != NULL)
+		return field->name;
+	else
+		return "NULL";
+}
+
 int print_graph(person* node){
 	printf("=========================================\n");
 	printf("========== Affichage du graphe ==========\n");
 	printf("=========================================\n");
 	person* actual_node = node;
-	char* name = (char*)malloc(255*sizeof(char));
-	char* sex = (char*)malloc(255*sizeof(char));
-	char* father = (char*)malloc(255*sizeof(char));
-	char* mother = (char*)malloc(255*sizeof(char));
-	char* father_child = (char*)malloc(255*sizeof(char));
-	char* mother_child = (char*)malloc(255*sizeof(char));
-	char* child = (char*)malloc(255*sizeof(char));
-	char* next = (char*)malloc(255*sizeof(char));
+	char* name, *sex, *father, *mother, *father_child, *mother_child, *child, *next;
 	do {
 		name = actual_node->name;
 		sex = str_sex(actual_node);
-		if (actual_node->father != NULL)
-			strcpy(father, actual_node->father->name);
-		else
-			strcpy(father, "NULL");
-		if (actual_node->mother != NULL)
-			strcpy(mother, actual_node->mother->name);
-		else
-			strcpy(mother, "NULL");
-		if (actual_node->father_child != NULL)
-			strcpy(father_child, actual_node->father_child->name);
-		else
-			strcpy(father_child, "NULL");
-		if (actual_node->mother_child != NULL)
-			strcpy(mother_child, actual_node->mother_child->name);
-		else
-			strcpy(mother_child, "NULL");
-		if (actual_node->child != NULL)
-			strcpy(child, actual_node->child->name);
-		else
-			strcpy(child, "NULL");
-		if (actual_node->next != NULL)
-			strcpy(next, actual_node->next->name);
-		else
-			strcpy(next, "NULL");
+		father = field_or_null(actual_node->father);
+		mother = field_or_null(actual_node->mother);
+		father_child = field_or_null(actual_node->father_child);
+		mother_child = field_or_null(actual_node->mother_child);
+		child = field_or_null(actual_node->child);
+		next = field_or_null(actual_node->next);
 		printf("----- Nouveau noeud -----\n");
 		printf("nom: %s\n", name);
 		printf("sexe: %s\n", sex);
@@ -134,20 +117,23 @@ int print_graph(person* node){
 		actual_node = actual_node->next;
 	} while (strcmp(actual_node->name, node->name) != 0);
 	return 0;
-	//pas besoin de free les char* car le strcpy est sympa
 }
 
 //exercice 2 question 8
-int free_person(person* p){
-	free(p->father);
-	free(p->mother);
-	free(p->child);
-	free(p->father_child);
-	free(p->mother_child);
-	free(p->next);
-	free(p->name);
-	free(p);
-	return 0;
+//Toujours nettoyer derriere soit
+int free_graph(person* g){
+	//petite fonction recursive auxiliaire (car j'aime bien ça)
+	int free_graph_rec(person* p){
+		if (p != NULL){
+			free(p->name);
+			if (p->next != g)
+				free_graph_rec(p->next);
+			free(p);
+			p = NULL;
+		}
+		return 0;
+	}
+	return free_graph_rec(g);
 }
 
 person* create_graph_from_file(char* file_name){
@@ -161,6 +147,8 @@ person* create_graph_from_file(char* file_name){
 	const char* separators = ";";
 	person* p;
 	int nline = 1;
+	/*Les 2 variables suivantes servent à savoir si on a ajouté
+	le père ou la mère, ce qui influera sur qui est le dernier noeud du graphe*/
 	int father_add = 0;
 	int mother_add = 0;
 
@@ -186,10 +174,11 @@ person* create_graph_from_file(char* file_name){
 				insert_person(p->father, p);
 				mother_to_child(new_person(mother, F), p);
 				insert_person(p->mother, p->father);
-				p = p->mother;
+				p = p->mother; //p devient le dernier noeud ajouté
 			} else {
 				insert_person(new_person(name, sex), p);
 				p = p->next;
+				//si le père n'est pas encore créé on s'en charge avant de faire le lien père enfant
 				if (find_by_name(father, p) == NULL){
 					father_to_child(new_person(father, M), p);
 					insert_person(p->father, p);
@@ -197,10 +186,11 @@ person* create_graph_from_file(char* file_name){
 				}
 				else 
 					father_to_child(find_by_name(father, p), p);
+				//Idem que pour le père mais avec la mère, tout en faisant attention au dernier ajouté
 				if (find_by_name(mother, p) == NULL){
 					mother_to_child(new_person(mother, F), p);
 					if (father_add)
-						insert_person(p->mother, p->father);
+						insert_person(p->mother, p->father); //le père est le dernier ajouté
 					else
 						insert_person(p->mother, p);
 					mother_add = 1;
@@ -209,6 +199,7 @@ person* create_graph_from_file(char* file_name){
 					mother_to_child(find_by_name(mother, p), p);
 				
 			}
+			//on met à jour p pour qu'il soit la derniere personne ajouté
 			if (father_add && !mother_add)
 				p = p->father;
 			if (mother_add)
@@ -231,6 +222,6 @@ person* create_graph_from_file(char* file_name){
 int main(){
 	person* p = create_graph_from_file("./registre.txt");
 	print_graph(p);
-	free_person(p);
+	free_graph(p);
 	return 0;
 }
