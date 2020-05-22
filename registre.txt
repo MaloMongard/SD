@@ -1,0 +1,10 @@
+M;JR Ewing Jr.;Jock Ewing;Miss Ellie
+M;Gary Ewing;Jock Ewing;Miss Ellie
+M;Bobby Ewing;Jock Ewing;Miss Ellie
+F;Tina Ewing;JR Ewing Jr.;Sue Ellen Shepard
+M;JR Ewing III;JR Ewing Jr.;Sue Ellen Shepard
+F;Lucy Ewing;Gary Ewing;Valene Clements
+M;Christopher Ewing;Bobby Ewing;Pamela Barnes
+M;Ray Krebbs;Jock Ewing;Margaret Hunter
+F;Margaret Krebbs;Ray Krebbs;Donna Culver
+M;Lucas Ewing;Ray Krebbs;Jenna Wade
