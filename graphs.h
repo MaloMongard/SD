@@ -27,7 +27,9 @@ int father_to_child(person* father, person* child);
 int mother_to_child(person* mother, person* child);
 person* find_by_name(char* name, person* node);
 char* str_sex(person* node);
+char* field_or_null(person* field);
 int print_graph(person* node);
+int free_graph(person* g);
 person* create_graph_from_file(char* file_name);
 
 #endif
